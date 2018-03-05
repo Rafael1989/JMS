@@ -1,6 +1,5 @@
 package jms;
 
-import java.util.Properties;
 import java.util.Scanner;
 
 import javax.jms.Connection;
@@ -10,35 +9,42 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteProducer {
+public class TesteConsumidorTopicComercial {
 
 	public static void main(String[] args) throws NamingException, JMSException {
-		Properties properties = new Properties();
-		
-		properties.setProperty("java.naming.factory.initial", "org.apache.activemq.jndi.ActiveMQInitialContextFactory");
-		properties.setProperty("java.naming.provider.url", "tcp://localhost:61616");
-		properties.setProperty("queue.financeiro", "fila.financeiro");
-		
-		InitialContext initialContext = new InitialContext(properties);
+		InitialContext initialContext = new InitialContext();
 		
 		ConnectionFactory cf = (ConnectionFactory) initialContext.lookup("ConnectionFactory");
 		Connection conexao = cf.createConnection();
+		conexao.setClientID("comercial");
 		conexao.start();
 		
 		Session session = conexao.createSession(false, Session.AUTO_ACKNOWLEDGE);
-		Destination fila = (Destination) initialContext.lookup("financeiro");
-		MessageProducer producer = session.createProducer(fila);
-
-		for(int i = 0;i < 100;i++) {
-			Message message = session.createTextMessage("<pedido><id>"+i+"</id></pedido>");
-			producer.send(message);
-		}
+		Topic topic = (Topic) initialContext.lookup("loja");
+		MessageConsumer consumer = session.createDurableSubscriber(topic, "assinatura");
+		
+		consumer.setMessageListener(new MessageListener() {
+			
+			@Override
+			public void onMessage(Message message) {
+				TextMessage textMessage = (TextMessage) message;
+				try {
+					System.out.println(textMessage.getText());
+				} catch (JMSException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		
+		
 		
 		new Scanner(System.in).nextLine();
 		
