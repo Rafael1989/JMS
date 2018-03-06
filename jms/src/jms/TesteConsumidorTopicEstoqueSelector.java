@@ -15,7 +15,7 @@ import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorTopic {
+public class TesteConsumidorTopicEstoqueSelector {
 
 	public static void main(String[] args) throws NamingException, JMSException {
 		InitialContext initialContext = new InitialContext();
@@ -27,7 +27,7 @@ public class TesteConsumidorTopic {
 		
 		Session session = conexao.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Topic topic = (Topic) initialContext.lookup("loja");
-		MessageConsumer consumer = session.createDurableSubscriber(topic, "assinatura");
+		MessageConsumer consumer = session.createDurableSubscriber(topic, "assinatura","ebook is null OR ebook=false",false);
 		
 		consumer.setMessageListener(new MessageListener() {
 			
