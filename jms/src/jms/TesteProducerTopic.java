@@ -8,13 +8,13 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import br.com.caelum.modelo.Pedido;
+import br.com.caelum.modelo.PedidoFactory;
 
 public class TesteProducerTopic {
 
@@ -34,8 +34,18 @@ public class TesteProducerTopic {
 		Session session = conexao.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		Destination topic = (Destination) initialContext.lookup("loja");
 		MessageProducer producer = session.createProducer(topic);
+		
+		Pedido pedido = new PedidoFactory().geraPedidoComValores();
+		
+		/*StringWriter stringWriter = new StringWriter();
+		
+		JAXB.marshal(pedido, stringWriter);
+		
+		String xml = stringWriter.toString();
+		
+		System.out.println(xml);*/
 
-		Message message = session.createTextMessage("<pedido><id>333</id></pedido>");
+		Message message = session.createObjectMessage(pedido);
 		//message.setBooleanProperty("ebook", false);
 		producer.send(message);
 		

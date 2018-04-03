@@ -23,7 +23,7 @@ public class TesteConsumidorQueue {
 		Connection conexao = cf.createConnection();
 		conexao.start();
 		
-		Session session = conexao.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Session session = conexao.createSession(true, Session.SESSION_TRANSACTED);
 		Destination fila = (Destination) initialContext.lookup("financeiro");
 		MessageConsumer consumer = session.createConsumer(fila);
 		
@@ -31,11 +31,12 @@ public class TesteConsumidorQueue {
 			
 			@Override
 			public void onMessage(Message message) {
-				TextMessage textMessage = (TextMessage) message;
 				try {
+					message.acknowledge();
+					TextMessage textMessage = (TextMessage) message;
 					System.out.println(textMessage.getText());
+					session.commit();
 				} catch (JMSException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
